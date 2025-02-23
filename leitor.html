@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merenda Fácil</title>
+</head>
+<body>
+    <h1>Merenda Fácil</h1>
+    <form id="scan-form">
+        <label for="RA">RA:</label>
+        <input type="text" id="RA" name="RA" required><br>
+        <label for="serie">Série:</label>
+        <input type="text" id="serie" name="serie" required><br>
+        <label for="nome_aluno">Nome do Aluno:</label>
+        <input type="text" id="nome_aluno" name="nome_aluno" required><br>
+        <label for="restricaoAlimentar">Restrição Alimentar:</label>
+        <input type="text" id="restricaoAlimentar" name="restricaoAlimentar"><br>
+        <button type="submit">Escanear</button>
+    </form>
+
+    <form id="report-form">
+        <label for="startDate">Data Inicial:</label>
+        <input type="date" id="startDate" name="startDate" required><br>
+        <label for="endDate">Data Final:</label>
+        <input type="date" id="endDate" name="endDate" required><br>
+        <button type="submit">Gerar Relatório</button>
+    </form>
+
+    <script>
+        document.getElementById('scan-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            fetch('http://localhost:3000/scan', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.text())
+            .then(response => alert(response))
+            .catch(error => console.error('Erro:', error));
+        });
+
+        document.getElementById('report-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(e.target);
+            const data = {};
+            formData.forEach((value, key) => {
+                data[key] = value;
+            });
+
+            fetch('http://localhost:3000/generate-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = 'relatorio.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+            })
+            .catch(error => console.error('Erro:', error));
+        });
+    </script>
+</body>
+</html>
+
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Merenda Fácil</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f0f7ff; /* Azul claro para o fundo */
+            margin: 0;
+            padding: 0;
+        }
+
+        h1 {
+            color: #007bff; /* Azul primário para o título */
+            text-align: center;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            padding: 20px;
+            background-color: #ffffff; /* Fundo branco para o formulário */
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 10px;
+            color: #007bff; /* Azul primário para as etiquetas */
+        }
+
+        input[type="date"] {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 20px;
+            border: 1px solid #007bff; /* Azul primário para a borda do campo de data */
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+
+        button {
+            width: 100%;
+            padding: 10px;
+            background-color: #007bff; /* Azul primário para o botão */
+            color: #ffffff; /* Texto branco para o botão */
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        button:hover {
+            background-color: #0056b3; /* Azul escuro quando hover */
+        }
+    </style>
+</head>
+<body>
+
+   
+       
+    </form>
+
+    <script>
+        document.getElementById('report-form').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+
+            fetch('http://localhost:3000/generate-report', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ startDate, endDate })
+            })
+            .then(response => response.blob())
+            .then(blob => {
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = 'relatorio.xlsx';
+                document.body.appendChild(a);
+                a.click();
+                window.URL.revokeObjectURL(url);
+                alert('O arquivo Excel foi baixado. Abra-o usando o Excel.');
+            })
+            .catch(error => console.error('Erro:', error));
+        });
+    </script>
+</body>
+</html>
